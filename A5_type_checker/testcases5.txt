@@ -1,0 +1,79 @@
+%variables
+hastype([p(variable("X"),intT),p(variable("Y"),intT)],variable("X"),T).
+hastype([p(variable("X"),boolT),p(variable("X"),intT)],variable("X"),T).
+
+%Constants
+hastype([],const(-652),T).
+hastype([],bl(true),T).
+
+%arithmetic
+hastype([],add(sub(const(2),const(5)), div(const(6),mul(const(2),const(5)))),T).
+
+%boolean
+hastype([p(variable("X"),boolT)],andd(implies(orr(variable("X"), bl(false)), bl(true)),implies(variable("X"), nott(bl(false)))),T).
+
+%comparison
+hastype([p(variable("X"),boolT),p(variable("Y"),intT)],orr(andd(gtr(const(-2), const(6)), les(const(3),const(100))),implies(equ(const(5), variable("Y")), variable("X"))),T).
+
+%equality
+// equality not implemented for tuple
+hastype([],equ(tuple([tuple([const(1),const(3)]),bl(true)]),tuple([const(1), const(3),bl(true)])),T).
+
+%if then else
+% E1 and E2 doesn't have same types.
+hastype([p(variable("X"),boolT),p(variable("Y"),intT)],ifthen(andd(variable("X"),gtr(variable("Y"),const(0))),variable("Y"),variable("X")),T).
+
+%let d in e
+hastype([p(variable("Y"),intT)],letin(def(variable("X"),const(3)),add(variable("Y"),variable("X"))),T).
+
+hasType([p(variable(x),intT)],letin(def(variable(y),const(3)),mul(variable(y),const(5))),T).
+
+%abstraction
+hastype( [p(variable("X"), boolT), p(variable("W"), boolT)], lambda(variable("X"), variable("W")), arrowT(boolT, boolT)). 
+hastype( [p(variable(x), boolT), p(variable(w), boolT)], lambda(variable(x), variable(w)), arrowT(boolT, boolT)). 
+
+%application
+hastype([p(variable(r), arrowT(boolT,boolT)), p(variable(s), boolT)], call(variable(r), variable(s)), boolT).
+hastype([p(variable(r), arrowT(boolT,boolT)), p(variable(s), boolT), p(variable(s), boolT), p(variable(r), arrowT(boolT,boolT))], call(variable(r), variable(s)), X).
+
+
+%n-tuple
+%variable y is not defined
+hastype([p(variable(x), boolT), p(variable(w), boolT), p(variable(y), boolT)], tuple([variable(x), variable(w), andd(variable(x), variable(y))]), cartesianT([(boolT), (boolT), boolT])).
+
+%projection
+%variable x,w not defined
+hastype([p(variable(y), boolT), p(variable(z), boolT),p(variable(x),boolT),p(variable(w),boolT)], proj(1,tuple([variable(x), variable(w), andd(variable(x), variable(y))]) ), boolT).
+
+%constructors
+hastype([(variable(r), typevar(boolT))] ,inl(variable(r)), disjunction(typevar(boolT),typevar(boolT))).
+hastype([(variable(r), typevar(boolT))] ,inl(variable(r)), X).
+hastype([(variable(r), typevar(boolT))] ,inr(variable(r)), disjunction(typevar(boolT),typevar(boolT))).
+
+%case analysis
+hastype([(variable(t), typevar(boolT)), (variable(r), typevar(boolT))], case(inl(variable(t)), variable(r)), typevar(boolT)).
+hastype([(variable(t), typevar(boolT)), (variable(r), typevar(boolT))], case(inr(variable(t)), variable(r)), typevar(boolT)).
+
+
+%type elaborates
+
+typeElaborates([],def(variable("X"),add(const(3),const(4))),T).
+typeElaborates([],def(variable("Y"),bl(true)),T).
+typeElaborates([],par(def(variable("X"),const(3)),def(variable("Y"),bl(true))),T).
+typeElaborates([],par(def(variable("X"),const(3)),def(variable("X"),bl(true))),T).
+typeElaborates([],seq(def(variable("X"),mul(const(31),const(20))),def(variable("Y"),bl(true))),T).
+typeElaborates([p(variable("X"),boolT),p(variable("Y"),intT)],loc(def(variable("X"),const(31)),par(def(variable("X"),tuple([variable("Y")])),def(variable("Y"),bl(false)))),T).
+
+typeElaborates([p(variable("X"),boolT),p(variable("Y"),intT)],loc(def(variable("X"),const(20)),par(def(variable("X"),const(3)),def(variable("Y"),bl(false)))),T).
+
+typeElaborates([p(variable(x),intT)],def(variable(y),const(9)),Gamma).
+
+typeElaborates([p(variable(x),intT)],seq(def(variable(z),bl(true)),def(variable(y),bl(false))),Gamma).
+
+typeElaborates([p(variable(x),intT)],par(def(variable(z),const(9)),def(variable(y),const(0))),Gamma).
+
+typeElaborates([p(variable(x),intT)],seq(def(variable(z),const(9)),def(variable(y),const(4))),Gamma).
+
+typeElaborates([p(variable(x),intT)],par(seq(def(variable(z),const(8)),def(variable(y),bl(true))),def(variable(y),bl(false))),Gamma).
+
+typeElaborates([p(variable(x),intT)],seq(par(def(variable(z),const(45)),def(variable(y),bl(false))),def(variable(y),const(8))),Gamma).

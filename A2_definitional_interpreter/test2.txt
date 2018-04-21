@@ -1,0 +1,50 @@
+(* Note:
+ * Please make suitable changes to the shared test cases so that
+ * the constructors match your signature definition.
+ *)
+
+(*--==Compile & Execute==--*)
+
+eval (Add(Const(1),Const(2)));;
+execute ([],rho,compile(Add(Const(1),Const(2))));;
+eval (Multiply(Const(6),Const(6)));;
+execute ([],rho,compile(Multiply(Const(6),Const(6))));;
+eval (Exponent(Const(2),Const(4)));;
+execute ([],rho,compile(Exponent(Const(2),Const(4))));;
+eval (Divide(Const(6),Const(3)));;
+execute ([],rho,compile(Divide(Const(6),Const(3))));;
+
+eval (Vars("iden1"));;
+execute ([],rho,compile(Add(Const(1),Const(2))));;
+eval (Vars("iden2"));;
+execute ([],rho,compile(Add(Const(1),Const(2))));;
+
+eval (Abs(Const(-1)));;
+execute ([],rho,compile(Abs(Const(-1))));;
+eval (Proj(2,Tuple([Const(12);Const(121);Const(33)])));
+execute ([],rho,compile(Proj(2,Tuple([Const(12);Const(121);Const(33)]))));;
+
+eval (Subtract(Proj(2,Tuple[Const(2);Const(5);Const(8)]),Const(1)));;
+execute ([],rho,compile(Subtract(Proj(2,Tuple[Const(2);Const(5);Const(8)]),Const(1))));;
+eval (Mod(Proj(2,Tuple[Const(2);Const(5);Const(8)]),Const(2)));;
+execute ([],rho,compile(Mod(Proj(2,Tuple[Const(2);Const(5);Const(8)]),Const(2))));;
+
+let t1=(Or(Equal(Const(5),Const(5)),And(Equal(Subtract(Const(2),Const(1)),Const(1)),Mod(Proj(2,Tuple[Const(2);Const(5);Const(8)]),Const(2)))));;
+																	and bool  int 
+eval (Or(Equal(Const(5),Const(5)),And(Equal(Subtract(Const(2),Const(1)),Const(1)),Equal (Mod(Proj(2,Tuple[Const(2);Const(5);Const(8)]),Const(2)),Const(0)))));;
+eval t1;;
+execute([],rho,(compile t1));;
+
+eval (And(BoolConst(true), BoolConst(false)));;
+execute ([],rho,compile(And(BoolConst(true), BoolConst(false))));;
+eval (Implies(Not(Implies(Or(BoolConst(true), BoolConst(false)), And(BoolConst(true), BoolConst(false)))),Implies(And(BoolConst(true), BoolConst(false)), Or(BoolConst(true), BoolConst(false)))));;
+execute ([],rho,compile(Implies(Not(Implies(Or(BoolConst(true), BoolConst(false)), And(BoolConst(true), BoolConst(false)))),Implies(And(BoolConst(true), BoolConst(false)), Or(BoolConst(true), BoolConst(false))))));;
+
+eval (GreaterEqual(Const(4),Const(2)));;
+execute ([],rho,compile((GreaterEqual(Const(4),Const(2)))));;
+eval (LessEqual(Const(4),Const(2)));;
+execute ([],rho,compile(LessEqual(Const(4),Const(2))));;
+Ifthenelse(Gtr(Const(4),Const(2)),Add(Const(1),Const(3)),Subtract(Const(1),Const(3)));
+
+(* Lambda is a lambda function of type exp*exp and LetinEnd is a ternary operator of type exp*exp*exp *)
+Apply(Lambda(Vars("x"),LetinEnd(Para[Assgn(Vars("a"),Const(2))],Add(Vars("a"),Vars("x")))),Const(2))

@@ -1,0 +1,41 @@
+let alpha = [A "1";A "2";A "a";A "b"; A "c";A "A"];;
+
+lgh {marker=0 ; l=[||]};;
+lgh {marker=0 ; l=[|A "a"|]};;
+lgh {marker=0 ; l=[|A "a";A "b";A "c"|]};;
+lgh {marker=0 ; l=[|A "1";A "2"|]};;
+
+nonempty {marker=0; l=[||]};;
+nonempty {marker=0; l=[|A "a"|]};;
+nonempty {marker=0; l=[|A "1";A "2"|]};;
+
+concat {marker=0;l=[||]} {marker=0;l=[||]};;
+concat {marker=0;l=[||]} {marker=0;l=[|A "a"|]};;
+concat {marker=0;l=[|A "1"|]} {marker=0;l=[||]};;
+concat {marker=0;l=[|A "1";A "A"|]} {marker=0;l=[|A "a";A "b";A "c"|]};;
+
+let a={marker=0;l=[||]};;
+reverse a;;
+a;;
+let b={marker=0;l=[|A "a";A "b";A "c"|]};;
+reverse b;;
+b;;
+let c={marker=0;l=[|A "1";A "2"|]};;
+reverse c;;
+c;;
+
+first {marker=0;l=[||]};;
+first {marker=0;l=[|A "a"|]};;
+first {marker=0;l=[|A "a";A "b";A "c"|]};;
+
+last {marker=0;l=[||]};;
+last {marker=0;l=[|A "a"|]};;
+last {marker=0;l=[|A "a";A "b";A "c"|]};;
+
+let editable = create "abac12a2aAac211";;
+	
+forward editable;;
+back editable;;
+moveTo 10 editable;;
+replace editable "b";;
+

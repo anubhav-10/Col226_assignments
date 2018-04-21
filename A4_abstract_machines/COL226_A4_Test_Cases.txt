@@ -1,0 +1,119 @@
+(*
+ * Note: you need to change the following datatype and expressions as per your submitted code
+ * Please do the changes before you come for demo.
+ *)
+
+datatype exp = Num of int
+			| Bool of bool
+			| Var of string
+			| List of exp list
+			| Plus of exp * exp
+			| Sub of exp * exp
+			| Mult of exp * exp
+			| Div of exp * exp
+			| Tup of exp list
+			| Proj of exp * int
+			| Gtr of exp * exp
+			| Lsr of exp * exp
+			| Eql of exp * exp
+			| Ifthenelse of exp * exp * exp
+			| Lambda of exp * exp
+			| App of exp * exp
+			| LetinEnd of exp * exp
+			| Assgn of exp * exp
+			| Seq of exp list
+			| Para of exp list
+			| Localinend of exp list * exp
+			| Dec of exp list
+			| Ctup of closure list
+			| At of int
+			| Bind of exp
+			
+			| Restp of exp
+			| Tothisp of exp
+			| Rests of exp
+			| Tothiss of exp
+			| Restm of exp
+			| Tothism of exp
+			| Restd of exp
+			| Tothisd of exp
+			| Restg of exp
+			| Tothisg of exp
+			| Restl of exp
+			| Tothisl of exp
+			| Reste of exp
+			| Tothise of exp
+			| Ifthn of exp * exp
+			| Lets of exp*exp
+			and
+			closure = ACL of (exp * closure) list * exp
+
+
+type tab = (exp * closure) list
+and closure = Clos of exp * tab;;
+
+//krivine(ACL([(Var("z"),ACL([],Num(3)))],Var("z")),[]);;
+krivine(Clos(Vars "z",[Vars "z",Clos(Const(3),[])]),[]);;
+
+//krivine(ACL([],Plus(Plus(Num(2),Num(3)),Plus(Num(2),Num(3)))),[]);;
+krivine(Clos(Add(Add(Const(2),Const(3)),Add(Const(2),Const(3))),[]),[]);;
+
+//krivine(ACL([(Var("z"),ACL([],Num(3)))],Plus(Num(2),Var("z"))),[]);;
+krivine(Clos(Add(Const(2),Vars("z")),[Vars "z",Clos(Const(3),[])]),[]);;
+
+//krivine(ACL([],App(Lambda(Var("x"),Plus(Var("x"),Num(1))),Num(2))),[]);;
+krivine(Clos(Call(Lambda(Vars("x"),Add(Vars("x"),Const(1))),Const(2)),[]),[]);;
+
+//krivine(ACL([],App(Lambda(Var("x"),Mult(Var("x"),Plus(Var("x"),Num(1)))),Num(2))),[]);;
+krivine(Clos(Call(Lambda(Vars("x"),Multiply(Vars("x"),Add(Vars("x"),Const(1)))),Const(2)),[]),[]);;
+
+//krivine(ACL([],App(Lambda(Var("x"),App(Lambda(Var("d"),Mult(Var("d"),Num(2))),Num(2))),Num(2))),[]);;
+krivine(Clos(Call(Lambda(Vars("x"),Call(Lambda(Vars("d"),Multiply(Vars("d"),Const(2))),Const(2))),Const(2)),[]),[]);;
+
+//krivine(ACL([],Ifthenelse(Gtr(Num(8),Num(2)),App(Lambda(Var("x"),Div(Var("x"),Num(2))),Num(2)),App(Lambda(Var("x"),Mult(Var("x"),Plus(Var("x"),Num(1)))),Num(2)))),[]);;
+krivine(Clos(Ifthen(Greater(Const(8),Const(2)),Call(Lambda(Vars("x"),Divide(Vars("x"),Const(2))),Const(2)),Call(Lambda(Vars("x"),Multiply(Vars("x"),Add(Vars("x"),Const(1)))),Const(2))),[]),[]);;
+
+//krivine(ACL([],Ifthenelse(Gtr(Num(1),Num(2)),App(Lambda(Var("x"),Div(Var("x"),Num(2))),Num(2)),App(Lambda(Var("x"),Mult(Var("x"),Plus(Var("x"),Num(1)))),Num(2)))),[]);;
+krivine(Clos(Ifthen(Greater(Const(1),Const(2)),Call(Lambda(Vars("x"),Divide(Vars("x"),Const(2))),Const(2)),Call(Lambda(Vars("x"),Multiply(Vars("x"),Add(Vars("x"),Const(1)))),Const(2))),[]),[]);;
+
+//krivine(ACL([],LetinEnd(Para[Assgn(Var("a"),Num(2))],Plus(Var("a"),Num(20)))),[]);;
+krivine(Clos(LetD(Assign(Vars "a",Const(2)),Add(Vars "a",Const(20))),[]),[]);;
+
+//krivine(ACL([],LetinEnd(Seq[Assgn(Var("a"),Num(2))],Plus(Var("a"),Num(20)))),[]);;
+krivine(Clos(Letin("a",Const(2),Add(Vars "a",Const(20))),[]),[]);;
+
+//krivine(ACL([],Proj(Tup([Num(1),Num(2),Num(3)]),2)),[]);;
+krivine(Clos(Proj(2,Tuple([Const(1);Const(2);Const(3)])),[]),[]);;
+
+//krivine(ACL([],App(Lambda(Var("x"),LetinEnd(Para[Assgn(Var("a"),Num(2))],Plus(Var("a"),Var("x")))),Num(2))),[]);;
+krivine(Clos(Call(Lambda(Vars "x",Letin("a",Const(2),Add(Vars "a",Vars "x"))),Const(2)),[]),[]);;
+
+
+//SECD([Proj(Tup([Num(12),Num(121),Num(33)]),2)]);;
+secd([],[],compile(Proj(2,Tuple([Const(12);Const(121);Const(33)]))),[]);;
+
+//SECD([LetinEnd(Para([Assgn(Var("a"),Num(1)),Assgn(Var("b"),Num(2)),Assgn(Var("c"),Num(3))]),Plus(Plus(Var("a"),Var("b")),Mult(Var("c"),Num(2)))),Mult(Num(2),Num(3))]);;
+let a = LetD(Par(Assign("a",Const(1)),Par(Assign("b",Const(2)),Assign("c",Const(3)))),Add(Add(Vars "a",Vars "b"),Multiply(Vars "c",Const(2))));;
+secd([],[],compile(a),[]);;
+
+//SECD([Ifthenelse(Gtr(Num(4),Num(2)),Plus(Num(1),Num(3)),Sub(Num(1),Num(3)))]);;
+secd([],[],compile(Ifthen(Greater(Const(4),Const(2)),Add(Const(1),Const(3)),Subtract(Const(1),Const(3)))),[]);;
+
+//SECD([LetinEnd(Dec([Para([Assgn(Var("f"),Bool(false))]),Seq([Assgn(Var("a"),Num(1)),Assgn(Var("b"),Num(2)),Assgn(Var("c"),Num(3))])]),Plus(Plus(Var("a"),Var("b")),Mult(Var("c"),Num(2)))),Mult(Num(2),Num(3))]);;
+
+let a= LetD(Par(Assign("f",BoolConst(false)),Seq(Seq(Assign("a",Const(1)),Assign("b",Const(2))),Assign("c",Const(2)))),Add(Add(Vars "a",Vars "b"),Multiply(Vars "c",Const(2))));;
+secd([],[],compile(a),[]);;
+
+//SECD([App(Lambda(Var("x"),Plus(Var("x"),Num(1))),Num(2))]);;
+secd([],[],compile(Call(Lambda("x",Add(Vars("x"),Const(1))),Const(2))),[]);;
+
+//SECD([App(Lambda(Var("x"),Mult(Var("x"),Plus(Var("x"),Num(1)))),Num(2))]);;
+secd([],[],compile(Call(Lambda("x",Multiply(Vars("x"),Add(Vars("x"),Const(1)))),Const(2))),[]);;
+
+//SECD([App(Lambda(Var("x"),App(Lambda(Var("d"),MultVar("d"),Num(2))),Num(2))),Num(2)]);;
+secd([],[],compile(Call(Lambda("x",Call(Lambda("d",Multiply(Vars("d"),Const(2))),Const(2))),Const(2))),[]);;
+
+SECD([Seq([Assgn(Var("a"),LetinEnd(Para([Assgn(Var("a"),Num(1))]),App(Lambda(Var("x"),Plus(Var("x"),Num(1))),Var("a"))))]),Plus(Var("a"),Num(1))]);
+
+let a = LetD(Assign("a",Const(1)),Call(Lambda("x",Add(Vars "x",Const(1))),Vars "a"));;
+secd([],[],compile(a),[]);;
