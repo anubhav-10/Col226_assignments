@@ -2,8 +2,8 @@ type symbol = Sym of string;;
 type term = Const of string | Vars of string | Node of (symbol * (term list));;
 type atom = symbol * (term list);;
 type goal = atom list;;
-type head = Head of atom;;
-type body = Body of atom list;;
+type head = atom;;
+type body = atom list;;
 type clause = Fact of head | Rule of head * body;;
 type program = clause list;;
 
@@ -11,6 +11,12 @@ type program = clause list;;
 let rec map f l = match l with
 			  [] -> []
 			| (x::xs) -> (f x)::(map f xs);;
+let rec map2 l = match l with
+	| [] -> []
+	| (x::xs) -> (Node x)::(map2 xs);;
+let rec map3 l = match l with
+	| [] -> []
+	| ((Node x)::xs) -> (x)::(map3 xs);;
 let rec foldl f e l = match l with
 			  [] -> e
 			| x::xs -> foldl f (f(x,e)) xs;;
@@ -48,7 +54,7 @@ let rec compose l1 l2 = match l1 with
 	| ((a,b)::xs) -> 
 		if (contain a l2) then (a,replace a l2)::xs 
 		else (a,b)::(compose xs l2);;
-		
+
 let rec mgu_util l1 l2 l f = match (l1,l2) with
 	| ([],[]) -> l
 	| (x::xs,y::ys) -> mgu_util xs ys (compose (f (subst l x) (subst l y) l) l) f;;
@@ -63,10 +69,39 @@ let rec mgu t1 t2 l = match (t1,t2) with
 		if(u<>x) then raise NOT_UNIFIABLE
 		else mgu_util v y [] mgu;;
 
-let rec solve prog goal = match prog with 
-	| Fact (Head a) -> mgu (Node goal) (Node a) [] 
+let rec print l = match l with
+	| [] -> Printf.printf "\n\n"		
+	| (a,Vars(b))::xs -> Printf.printf "%s = %s\n" a b;print xs
+	| (a,Const(b))::xs -> Printf.printf "%s = %s\n" a b;print xs;; 
+
+(* let rec solve_body l =  *)
+exception FAIL;;
+let rec solve orig_prog curr_prog goal stack ans final_ans= match (curr_prog,goal,stack) with
+	| (_,[],[]) -> print ans
+	| ([],x,[]) -> raise FAIL
+	| ([],_,(g,prog,sigma)::ss) -> solve orig_prog prog g ss sigma final_ans
+	| (_,[],(g,prog,sigma)::ss) -> print ans;solve orig_prog prog g ss sigma (final_ans@sigma)
+	| (Fact(y)::ys,x::xs,s)-> 
+					(try
+						let l = compose ans (mgu (Node y) (subst ans (Node x)) []) in
+							solve orig_prog orig_prog xs ((x::xs,ys,ans)::s) l final_ans
+(* 						(let l = mgu (Node y) (subst ans (Node x)) [] in 
+						if (l = []) then (Printf.printf "true")
+						else print l;if (ys = []) then solve orig_prog orig_prog xs stack (compose ans l) final_ans else solve orig_prog ys goal stack (compose ans l) final_ans)  *)
+					with _ -> (* if (ys = []) then solve orig_prog orig_prog xs stack ans final_ans else solve orig_prog ys goal stack ans final_ans) *)
+						solve orig_prog ys (x::xs) s ans final_ans)
+
+	| (Rule(h,b)::ys,x::xs,s) ->
+					(try 
+						(let l = compose ans (mgu (Node h) (subst ans (Node x)) []) in
+						(* solve orig_prog orig_prog (map3 ((map (subst l) (map2 b)))@goal) ((goal,curr_prog,ans)::s) l) *)
+						solve orig_prog orig_prog b ((x::xs,curr_prog,ans)::s) l final_ans)
+					with _ -> solve orig_prog ys (x::xs) s ans final_ans)
+
 ;;
 
-
-let prog = Fact(Head(Sym "a",[Const "b"]));;
-let gl = (Sym "a",[Const "b"]);;
+let c = [Fact(Sym "male",[Const "franc"]);Fact(Sym "male",[Const "marko"]);Fact(Sym "female",[Const "jozefa"]);Fact(Sym "child",[Const "marko";Const "franc"]);Fact(Sym "child",[Const "marko";Const "jozefa"]);Rule((Sym "son",[Vars "x";Vars "y"]),[(Sym "male",[Vars "x"]);(Sym "child",[Vars "x";Vars "y"])])];;
+let g = [Sym "son",[Const "marko";Vars "Z"]];;
+(* 
+let c = [Fact(Sym "male",[Const "Ned"]);Fact(Sym "male",[Const "Jon"])];;
+let g = [Sym "male",[Vars "x"]];; *)
