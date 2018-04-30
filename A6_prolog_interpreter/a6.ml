@@ -49,11 +49,33 @@ let rec replace a l = match (a,l) with
 let rec contain a l = match (a,l) with
 			  (_,[]) -> false
 			| (a,(b,c)::t) -> if (a=b) then true else contain a t;;
-let rec compose l1 l2 = match l1 with 
-	| [] -> l2
-	| ((a,b)::xs) -> 
-		if (contain a l2) then (a,replace a l2)::xs 
-		else (a,b)::(compose xs l2);;
+
+let compose sigma1 sigma2 =
+    let rec aux s1 s2 i =
+        match s1 with
+            [] -> i
+        |   (x, y)::ss -> aux ss s2 ((x, (subst s2 y))::i) in
+    let ret = aux sigma1 sigma2 [] in
+        let rec aux1 s i =
+            match s with
+                [] -> i
+            |   (x, y)::ss ->
+                    if contain x ss then aux1 ss i
+                    else aux1 ss ((x,y)::i) in
+
+    aux1 sigma2 ret
+;;
+
+(* let rec compose l1 l2 = 
+        let rec aux l1 l2 =(
+                match l1 with 
+                | [] -> []
+                | ((a,Vars(b))::xs) -> 
+                                if (contain b l2) then (a,replace b l2)::( aux xs l2)
+                        else ((a,Vars(b))::(aux xs l2))) in
+      
+        (aux l1 l2)@l2
+;;*)
 
 let rec mgu_util l1 l2 l f = match (l1,l2) with
 	| ([],[]) -> l
@@ -95,13 +117,24 @@ let rec solve orig_prog curr_prog goal stack ans final_ans= match (curr_prog,goa
 					(try 
 						(let l = compose ans (mgu (Node h) (subst ans (Node x)) []) in
 						(* solve orig_prog orig_prog (map3 ((map (subst l) (map2 b)))@goal) ((goal,curr_prog,ans)::s) l) *)
-						solve orig_prog orig_prog b ((x::xs,curr_prog,ans)::s) l final_ans)
+						solve orig_prog orig_prog b ((x::xs,ys,ans)::s) l final_ans)
 					with _ -> solve orig_prog ys (x::xs) s ans final_ans)
 
 ;;
 
-let c = [Fact(Sym "male",[Const "franc"]);Fact(Sym "male",[Const "marko"]);Fact(Sym "female",[Const "jozefa"]);Fact(Sym "child",[Const "marko";Const "franc"]);Fact(Sym "child",[Const "marko";Const "jozefa"]);Rule((Sym "son",[Vars "x";Vars "y"]),[(Sym "male",[Vars "x"]);(Sym "child",[Vars "x";Vars "y"])])];;
+let c = [Fact(Sym "male",[Const "franc"]);
+         Fact(Sym "male",[Const "marko"]);
+         Fact(Sym "female",[Const "jozefa"]);
+         Fact(Sym "child",[Const "marko"; Const "franc"]);
+         Fact(Sym "child",[Const "marko"; Const "jozefa"]);
+         Rule((Sym "son",[Vars "x"; Vars "y"]),
+               [(Sym "male",[Vars "x"]); 
+               (Sym "child",[Vars "x"; Vars "y"])])]
+;;
+
 let g = [Sym "son",[Const "marko";Vars "Z"]];;
-(* 
-let c = [Fact(Sym "male",[Const "Ned"]);Fact(Sym "male",[Const "Jon"])];;
+ 
+(* let c = [Fact(Sym "male",[Const "Ned"]);Fact(Sym "male",[Const "Jon"])];;
 let g = [Sym "male",[Vars "x"]];; *)
+
+(* solve c c g [] [] []*)
