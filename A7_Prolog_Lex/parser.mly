@@ -37,15 +37,14 @@ atom:
 
 atom_list:
     | atom                      {[$1]}
-    | atom COMMA atom_list      {[($1)::($3)]};
-
-term:
-    | VARS              {Vars($1)}
-    | CONST             {Const($1)}
-    | atom              {Node($1)};
+    | atom COMMA atom_list      {($1)::($3)};
 
 term_list:
     | term                  {[$1]}
     | term COMMA term_list  {($1)::($3)};
 
 
+term:
+    | VARS              {Vars($1)}
+    | CONST             {Const($1)}
+    | atom              {Node($1)};

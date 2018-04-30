@@ -1,6 +1,5 @@
 {
     open Parser
-    exception Eof
 }
 
 let vars = (['A'-'Z']['a'-'z''A'-'Z''0'-'9''_']*)
@@ -27,4 +26,4 @@ rule convert = parse
     | semi_colon    {SEMI_COLON}
     | eol           {convert lexbuf}
     | eof           {EOF}
-    | dot           {END} 
+    | dot           {DOT} 
